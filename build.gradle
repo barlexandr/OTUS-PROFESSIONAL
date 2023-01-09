@@ -1,0 +1,29 @@
+plugins {
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
+}
+
+ext {
+    guavaVersion = "31.0.1-jre"
+}
+
+allprojects {
+    group "ru.otus"
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    apply plugin: "io.spring.dependency-management"
+    dependencyManagement {
+        dependencies {
+            dependency "com.google.guava:guava:$guavaVersion"
+        }
+    }
+}
+
+//gradle -q hello
+task hello {
+    println 'Hello world!'
+}
