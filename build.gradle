@@ -1,10 +1,23 @@
 plugins {
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
     id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
+    id "org.springframework.boot" version "2.7.2" apply false
+    id "com.google.cloud.tools.jib" version "3.2.1" apply false
+    id "fr.brouillard.oss.gradle.jgitver" version "0.10.0-rc03" apply false
 }
 
 ext {
     guavaVersion = "31.0.1-jre"
+    jmhVersion = "1.3.6"
+    asmVersion = "9.4"
+    glassfishJsonVersion = "2.0.1"
+    lombokVersion = "1.18.24"
+    gsonVersion = "2.10"
+    cassandraVersion = "4.15.0"
+    mongodbVersion = "4.8.1"
+    mongodbReactiveVersion = "4.8.1"
+    neo4jVersion = "5.3.1"
+    jedisVersion = "4.3.1"
 }
 
 allprojects {
@@ -18,7 +31,51 @@ allprojects {
     apply plugin: "io.spring.dependency-management"
     dependencyManagement {
         dependencies {
-            dependency "com.google.guava:guava:$guavaVersion"
+            imports {
+                mavenBom "org.springframework.boot:spring-boot-dependencies:2.7.2"
+                mavenBom "org.testcontainers:testcontainers-bom:1.17.3"
+                mavenBom "com.google.protobuf:protobuf-bom:3.21.1"
+            }
+            dependency "com.google.guava:guava:${guavaVersion}"
+            dependency "org.openjdk.jmh:jmh-core:${jmhVersion}"
+            dependency "org.openjdk.jmh:jmh-generator-annprocess:${jmhVersion}"
+            dependency "org.ow2.asm:asm-commons:${asmVersion}"
+            dependency("org.glassfish:jakarta.json:${glassfishJsonVersion}")
+
+            dependency("org.projectlombok:lombok:${lombokVersion}")
+            dependency("com.google.code.gson:gson:${gsonVersion}")
+            dependency("com.datastax.oss:java-driver-core:${cassandraVersion}")
+
+            dependency("org.mongodb:mongodb-driver-core:${mongodbVersion}")
+            dependency("org.mongodb:mongodb-driver-sync:${mongodbVersion}")
+            dependency("org.mongodb:bson:${mongodbVersion}")
+            dependency("org.mongodb:mongodb-driver-reactivestreams:${mongodbReactiveVersion}")
+            dependency("org.neo4j.driver:neo4j-java-driver:${neo4jVersion}")
+            dependency("redis.clients:jedis:${jedisVersion}")
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            failOnVersionConflict()
+        }
+        resolutionStrategy {
+            force("javax.servlet:servlet-api:2.4")
+            force("commons-logging:commons-logging:1.1.1")
+            force("commons-lang:commons-lang:2.5")
+            force("org.codehaus.jackson:jackson-core-asl:1.8.8")
+            force("org.codehaus.jackson:jackson-mapper-asl:1.8.3")
+            force("org.codehaus.jettison:jettison:1.1")
+            force("net.java.dev.jna:jna:5.8.0")
+            force("com.google.errorprone:error_prone_annotations:2.7.1")
+        }
+    }
+}
+
+task managedVersions {
+    doLast {
+        dependencyManagement.managedVersions.each {
+            println it
         }
     }
 }
