@@ -11,7 +11,9 @@ public class CustomerService {
 
     public Map.Entry<Customer, String> getSmallest() {
         Map.Entry<Customer, String> entry = map.firstEntry();
-        return new AbstractMap.SimpleEntry<>(new Customer(entry.getKey()), entry.getValue());
+        return entry != null ?
+                new AbstractMap.SimpleEntry<>(new Customer(entry.getKey()), entry.getValue()) :
+                null;
     }
 
     public Map.Entry<Customer, String> getNext(Customer customer) {
