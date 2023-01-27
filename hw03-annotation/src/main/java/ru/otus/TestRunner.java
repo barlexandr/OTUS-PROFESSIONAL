@@ -3,6 +3,7 @@ package ru.otus;
 import ru.otus.annotation.After;
 import ru.otus.annotation.Before;
 import ru.otus.annotation.Test;
+import ru.otus.exception.BeforeEachException;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,27 +30,33 @@ public class TestRunner {
 
         try {
             for (Method test : tests) {
+                count = tests.size();
                 Object obj = clazz.getDeclaredConstructor().newInstance();
-                for (Method before : beforeTests) {
-                    try {
-                        before.invoke(obj);
-                    } catch (Exception e) {
-                        System.out.println("Create context before test failed");
-                    }
-                }
                 try {
-                    count++;
-                    test.invoke(obj);
-                    pass++;
-                } catch (Exception e) {
-                    System.out.println(e.getCause().getMessage());
-                    fail++;
-                }
-                for (Method after : afterTests) {
+                    for (Method before : beforeTests) {
+                        try {
+                            before.invoke(obj);
+                        } catch (Exception e) {
+                            fail++;
+                            throw new BeforeEachException(e.getMessage());
+                        }
+                    }
                     try {
-                        after.invoke(obj);
-                    } finally {
-                        System.out.println("Clean context after test");
+                        test.invoke(obj);
+                        pass++;
+                    } catch (Exception e) {
+                        System.out.println(e.getCause().getMessage());
+                        fail++;
+                    }
+                } catch (BeforeEachException e) {
+                    System.out.println("Create context before test failed");
+                } finally {
+                    for (Method after : afterTests) {
+                        try {
+                            after.invoke(obj);
+                        } finally {
+                            System.out.println("Clean context after test");
+                        }
                     }
                 }
             }
